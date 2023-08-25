@@ -1,35 +1,32 @@
-#!usr/bin/env python3
+#!/usr/bin/env python3
 
 import argparse
-import pyranges as pr
 import pandas as pd
-import os
-import datetime
-import numpy as np
 import re
 
-parser = argparse.ArgumentParser(description='co-expression dataframe')
-parser.add_argument('csv_data', type=str, 
-                                    help='gene and cluster in cvs format')
+parser = argparse.ArgumentParser(description='Organize gene ID according to co-expression data')
+parser.add_argument('tsv_data', type=str, 
+                                    help='gene and cluster in tsv format')
+parser.add_argument('outfile_prefix', type=str, help='It is prefix for the output files.')
 
 args = parser.parse_args()
 
-csv_data=args.csv_data
+tsv_data=args.tsv_data
 
-genecluster=pd.read_csv(csv_data, sep=";")
+genecluster=pd.read_csv(tsv_data, sep="\t")
 
-print(genecluster)
 
 dictgenecluster={}
 for i,r in genecluster.iterrows():
-    if r['Cluster'] not in dictgenecluster.keys():
-        dictgenecluster[r['Cluster']]=[]
-    dictgenecluster[r['Cluster']].append(r['GeneID'])
+    if r['cluster'] not in dictgenecluster.keys():
+        dictgenecluster[r['cluster']]=[]
+    dictgenecluster[r['cluster']].append(r['transcript'])
 
-for cluster in dictgenecluster:
-    fastaoutput = "Cluster_" + str(cluster) + "_coexpressao_cana_RianoSouza.fa"
+for cluster in dictgenecluster.keys():
+    fastaoutput = args.outfile_prefix + '_' + str(cluster) + "_coexpression.txt"
     with open (fastaoutput, "w") as clusterfile:
         for ID in dictgenecluster[cluster]:
             clusterfile.write(ID+"\n")
+
 
 
